@@ -6,11 +6,7 @@ import shutil
 import datetime
 import csv
 
-
-completeTotalCalls = 0
-completeTotalDuration = 0
-avgTalkTime = 0
-
+#Used to see when report from last updated/generated
 curDate = datetime.datetime.now()
 curDate = curDate.strftime("%Y-%m-%d")
 
@@ -45,17 +41,24 @@ phoneListing = {}
 for phone in registrations.split('\n'):
   print "Opening: " + phone
   config = open(phone, "r").read()
+
+  #Grab phone user's name
   displayName = re.search('reg.1.displayName="(.+)[^"]', config)
 
+  #Grab phone user's extension
   address = re.search('reg.1.address="(\d+)"', config)
 
+  #If the address is blank, skip this file
   if (address is None):
     continue
 
+  #Add address to associative array/dictionary
   phoneListing[displayName.group(1)[:-1]] = address.group(1)
 
+#List of all phone registration files in tftp directory
 registrations = commands.getoutput("ls /tftpboot/*reg*.cfg")
 
+#Loop through registrations, building a name : address dictionary
 for phone in registrations.split('\n'):
   if (phone == "/tftpboot/reg.cfg"):
     continue
@@ -66,6 +69,7 @@ for phone in registrations.split('\n'):
   address = re.search('reg.1.address="(\d+)"', config)
   phoneListing[displayName.group(1)[:-1]] = address.group(1)
 
+#Write entries to report in alphabetical order
 for k, v in sorted(phoneListing.iteritems()):
   report.write("\t\t<TR><TD>"  + k + "</TD><TD>" + v + "</TD></TR>\n")
 
